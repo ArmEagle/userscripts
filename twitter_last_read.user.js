@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      http://userscripts.org/scripts/source/59111.meta.js
-// @version        2.2.4
+// @version        2.3.1
 // @grant          none
 // ==/UserScript==
 
@@ -17,7 +17,7 @@ Whenever read tweets are loaded and displayed they will be marked (background co
 
 If you like the script, or not ... please leave a comment.
 
-* Only tested on Firefox. 
+* Only tested on Firefox.
  */
 
 
@@ -25,12 +25,12 @@ function DOM_script() {
 	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
 	script.setAttribute('type', 'text/javascript');
 	return script.textContent=DOM_script.toString().replace(/[\s\S]*"\$1"\);([\s\S]*)}/,"$1");
-	
+
 	// create container Object to prevent variables and function from going global
 	var AEG = {};
 	// Whether to show the confirm dialog when marking tweets read (for when the last-read tweet isn't loaded).
 	AEG.markTweetsUseConfirm = true;
-	
+
 	AEG.debug = false;
 	// is scrolling
 	AEG.isScrolling = false;
@@ -40,9 +40,9 @@ function DOM_script() {
 	AEG.countScrollInjects = -1;
 	// timeout, so not calling scrollintoview too often, reset on new inject and start new timer
 	AEG.scrollInjectTimer = null;
-	
+
 	AEG.streamItemCount = -1;
-	
+
 	/* Hook on nodeinsert events for the timeline
 	 *  Do it a few steps up, cause switching 'tabs' causes it to rebuild the tree.
 	 *  Checking for the actualy tweet elements anyway.
@@ -54,13 +54,13 @@ function DOM_script() {
 	AEG.addButtonBar = function() {
 		// add "Mark All Read" to the top of the timeline, next to the Tweets header
 		var buttonbar = document.querySelector('#global-actions');
-		
+
 		var li_buttonbar = document.createElement('li');
 		li_buttonbar.setAttribute('id', 'AEG-button-bar');
 
 		var li_buttonbar_box = document.createElement('div');
 		li_buttonbar_box.className = 'box';
-		
+
 		var li_markall = document.createElement('i');
 		li_markall.className = 'button';
 		li_markall.setAttribute('id', 'mark-all');
@@ -71,25 +71,25 @@ function DOM_script() {
 		li_scrolltolast.setAttribute('id', 'scroll-to-last');
 		li_scrolltolast.setAttribute('title', 'Scroll to last read tweet');
 		li_buttonbar_box.appendChild(li_scrolltolast);
-		
+
 		li_buttonbar.appendChild(li_buttonbar_box);
-		
+
 		buttonbar.appendChild(li_buttonbar);
-		
+
 		li_scrolltolast.addEventListener('click', function(event) {AEG.scrollToLastReadHandler(event)}, false);
 		li_markall.addEventListener('click', function(event) {AEG.setLastRead(event)}, false);
 	}
-	
+
 	AEG.addButtonBarOrig = function() {
 		// add "Mark All Read" to the top of the timeline, next to the Tweets header
 		var buttonbar = document.querySelector('#global-actions');
-		
+
 		var li_buttonbar = document.createElement('li');
 		li_buttonbar.setAttribute('id', 'AEG-button-bar');
 
 		var li_buttonbar_box = document.createElement('div');
 		li_buttonbar_box.className = 'box';
-		
+
 		var li_markall = document.createElement('i');
 		li_markall.className = 'button';
 		li_markall.setAttribute('id', 'mark-all');
@@ -100,15 +100,15 @@ function DOM_script() {
 		li_scrolltolast.setAttribute('id', 'scroll-to-last');
 		li_scrolltolast.setAttribute('title', 'Scroll to last read tweet');
 		li_buttonbar_box.appendChild(li_scrolltolast);
-		
+
 		li_buttonbar.appendChild(li_buttonbar_box);
-		
+
 		buttonbar.appendChild(li_buttonbar);
-		
+
 		li_scrolltolast.addEventListener('click', function(event) {AEG.scrollToLastReadHandler(event)}, false);
 		li_markall.addEventListener('click', function(event) {AEG.setLastRead(event)}, false);
 	}
-	
+
 	AEG.tweetInsertHandler = function(event) {
 		// mark if old
 		var lastReadID = AEG.getLastUrlReadID();
@@ -119,7 +119,7 @@ function DOM_script() {
 			//console.log(['post', event.target, event.target.className.indexOf("stream-item")]);
 		}
 	}
-	
+
 	// lookup the last tweet and store that ID in a cookie, then color all those tweets as read
 	AEG.setLastRead = function(event) {
 		try {
@@ -132,7 +132,7 @@ function DOM_script() {
 					firstChild = firstChild.nextElementSibling;
 				}
 				var lastTweetID = AEG.getTweetIDFromElement(firstChild);
-				
+
 				AEG.setLastUrlReadID(lastTweetID);
 				AEG.markRead(lastTweetID, true);
 			}
@@ -141,7 +141,7 @@ function DOM_script() {
 		}
 		event.stopPropagation();
 	}
-	
+
 	// mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also
 	AEG.markRead = function(id, all) {
 	    if (arguments.length < 2) {
@@ -160,7 +160,7 @@ function DOM_script() {
 			AEG.debugHandleException('AEG.markAllRead', exc);
 		}
 	}
-	// mark the tweet if its ID is lower or equal to id	
+	// mark the tweet if its ID is lower or equal to id
 	// @element : the insterted DOM element
 	// @id : lastReadID
 	AEG.testAndMarkTweet = function(element, id) {
@@ -170,7 +170,7 @@ function DOM_script() {
 				// happens with newly injected tweets. Since they're new, they don't have to be marked anyway.
 				return;
 			}
-			
+
 			// mark tweet if it's old
 			if ( tweetID <= id ) {
 				try {
@@ -220,7 +220,7 @@ function DOM_script() {
 	 *     an 'old' tweet and then stop scrolling them into view.
 	 *
 	 * Using the following 'global' settings:
-	 *  AEG.maxScrollInjects : (int) sets the max amount of tweets we allow to be loaded before we stop to scroll 
+	 *  AEG.maxScrollInjects : (int) sets the max amount of tweets we allow to be loaded before we stop to scroll
 	 */
 	AEG.scrollToLastReadHandler = function(event) {
 		var lastReadID = AEG.getLastUrlReadID();
@@ -244,7 +244,7 @@ function DOM_script() {
 			var lastReadTweet = document.querySelector('.stream > .stream-items > .stream-item.is-read:not([data-component-context="follow_activity"])');
 			lastReadTweet.scrollIntoView(false);
 		}
-		
+
 		// stop the other click listener (on parent 'a' element) from being called
 		event.stopPropagation();
 	}
@@ -313,7 +313,7 @@ function DOM_script() {
 	AEG.setLastUrlReadID = function(id) {
 		try {
 			var lastRead = AEG.getLastReadID();
-			lastRead[AEG.getPageKey()] = id;			
+			lastRead[AEG.getPageKey()] = id;
 			AEG.createCookie('AEG_lastReadID', JSON.stringify(lastRead), 365);
 		} catch (e) {
 			AEG.log(e);
@@ -343,24 +343,25 @@ function DOM_script() {
 		var key = location.href.replace('http://','').replace('https://','').replace('#', '').replace('!/', '');
 		return key;
 	}
-	
+
 	// get the correct tweet ID from a tweet div
 	/**
 	 * param element DOM_Element : to get the ID from
 	 * param use_base boolean    : return the 'data-item-id' even when this element is a retweet. This is needed for checking whether the last-read tweet is in view, because the retweet-id will be lower than the data-item-id
 	 */
 	AEG.getTweetIDFromElement = function(element, use_base) {
-		if (! element.hasAttribute('data-item-id')) {
+		var child = element.querySelector('div.tweet');
+		if ( ! child || ! child.hasAttribute('data-item-id')) {
 			return 0;
 		}
-		var tweetID = element.getAttribute('data-item-id').replace('-promoted', ''); //default value
+		var tweetID = child.getAttribute('data-item-id').replace('-promoted', ''); //default value
 		if ( tweetID.indexOf('_') > 0 ) {
 			tweetID = tweetID.split('_')[3]; //@todo don't know what this is for anymore
 		} else if ( !use_base ) {
 			// try to see whether this is a retweet, if so set this tweet's id to the original ID
 			var retweetChild = element.querySelector('div[data-retweet-id]');
-			if ( null != retweetChild ) {
-				tweetID = retweetChild.getAttribute('data-retweet-id').replace('-promoted', '');
+			if ( child.hasAttribute('data-retweet-id') ) {
+				tweetID = child.getAttribute('data-retweet-id').replace('-promoted', '');
 			}
 		}
 		return MyBigNumber(tweetID);
@@ -371,8 +372,8 @@ function DOM_script() {
 	if ( lastReadID != null ) {
 		AEG.markRead(MyBigNumber(lastReadID), false);
 	}
-	
-	function MyBigNumber(value) {	
+
+	function MyBigNumber(value) {
 		function BigNumber(value) {
 			var valueSize = 24; // number of 'digits' to use so we can always do string comparison of tweet id's by prepending zero's
 			var value = String(value);
@@ -380,7 +381,7 @@ function DOM_script() {
 			this.padzeros = function(val) {
 				while (val.length < valueSize) {
 					val = '0' + val;
-				}			
+				}
 				return val;
 			}
 			this.toJSON = this.toString = this.valueOf = function() {
@@ -439,7 +440,7 @@ function CSS_script() {
 	";
 }
 CSS_script();
-	
+
 // delay launching script till the sidebar is loaded; to prevent error and inject after the right element is found (as alternative to too many @includes)
 var delayInterval = window.setInterval(function() {
 	trigger = document.querySelector('.stream > .stream-items > .stream-item:first-child div.tweet')
