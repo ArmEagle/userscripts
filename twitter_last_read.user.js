@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      http://userscripts.org/scripts/source/59111.meta.js
-// @version        2.3.1
+// @version        2.3.2
 // @grant          none
 // ==/UserScript==
 
@@ -350,7 +350,7 @@ function DOM_script() {
 	 * param use_base boolean    : return the 'data-item-id' even when this element is a retweet. This is needed for checking whether the last-read tweet is in view, because the retweet-id will be lower than the data-item-id
 	 */
 	AEG.getTweetIDFromElement = function(element, use_base) {
-		var child = element.querySelector('div.tweet');
+		var child = element.querySelector('div.original-tweet');
 		if ( ! child || ! child.hasAttribute('data-item-id')) {
 			return 0;
 		}
@@ -359,7 +359,6 @@ function DOM_script() {
 			tweetID = tweetID.split('_')[3]; //@todo don't know what this is for anymore
 		} else if ( !use_base ) {
 			// try to see whether this is a retweet, if so set this tweet's id to the original ID
-			var retweetChild = element.querySelector('div[data-retweet-id]');
 			if ( child.hasAttribute('data-retweet-id') ) {
 				tweetID = child.getAttribute('data-retweet-id').replace('-promoted', '');
 			}
