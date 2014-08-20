@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      http://userscripts.org/scripts/source/59111.meta.js
-// @version        2.3.2
+// @version        2.3.3
 // @grant          none
 // ==/UserScript==
 
@@ -22,6 +22,9 @@ If you like the script, or not ... please leave a comment.
 
 
 function DOM_script() {
+	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
+	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
+	
 	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
 	script.setAttribute('type', 'text/javascript');
 	return script.textContent=DOM_script.toString().replace(/[\s\S]*"\$1"\);([\s\S]*)}/,"$1");
