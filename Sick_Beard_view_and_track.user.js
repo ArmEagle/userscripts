@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        Sick Beard view and track
 // @namespace   armeagle.nl
-// @include     http://10.255.255.2:8081/home/displayShow?show=*
-// @version     1
+// @include     http://*:8081/home/displayShow?show=*
+// @version     1.01
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -159,7 +159,7 @@ $('table.sickbeardTable tbody tr td:last-child a.epSearch').each(function() {
 	if ( season.length == 1 ) season = '0' + season;
 	if ( episode.length == 1 ) episode = '0' + episode;
 	var url = ($('#content > h1.title > a').text() + ' S' + season + 'E' + episode).replace(' ', '+');
-	url = 'http://nzbindex.nl/search/?q=' + url + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
+	url = 'http://nzbindex.nl/search/?q=' +  url.replace('&', ' ') + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
 	
 	$(this).before($('<a/>').attr('href', url).append(img));
 });
