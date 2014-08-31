@@ -22,8 +22,8 @@ If you like the script, or not ... please leave a comment.
 
 
 function DOM_script() {
-	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
-	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
+//	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
+//	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
 	
 	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
 	script.setAttribute('type', 'text/javascript');
