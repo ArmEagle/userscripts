@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        Sick Beard view and track
 // @namespace   armeagle.nl
-// @include     http://10.255.255.2:8081/home/displayShow?show=*
-// @version     1
+// @include     http://*:8081/home/displayShow?show=*
+// @version     1.03
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -69,7 +69,7 @@ $('table.sickbeardTable tbody tr th:nth-child(1)').each(function() {
 
 $('table.sickbeardTable tbody tr td:nth-child(1)').each(function() {
     var button = createButton(showId, $(this).find('input').attr('id'));
-    
+
     if ( button && button.hasClass('watched') ) {
         $(this).closest('tr').addClass('watched');
     }
@@ -81,7 +81,7 @@ function createButton(showId, episodeId) {
     if ( ! showId || ! episodeId ) {
         return null;
     }
-    
+
     var db = JSON.parse(localStorage.getItem('watchedTracker'));
     if ( db && db[showId] && db[showId][episodeId] ) {
         return $('<button/>').append('y').addClass('btn btn-mini button-watch watched')
@@ -106,7 +106,7 @@ function toggleWatched(button, showId, episodeId) {
 		delete db[showId][episodeId];
 	}
     localStorage.setItem('watchedTracker', JSON.stringify(db));
-    
+
     button.empty().append( button.hasClass('watched') ? 'n' : 'y' );
     button.closest('tr').toggleClass('watched');
     button.toggleClass('watched');
@@ -149,26 +149,52 @@ function handleKeyEvent(event) {
 }
 // end
 
-// Add nzbindex search
+// Add column for extra search links
+$('table.sickbeardTable tbody tr th:nth-child(1)').each(function() {
+    $(this).next().next().next().next().next().next().next().next().after(
+        $('<th/>')
+    )
+});
 
+$('table.sickbeardTable tbody tr td:nth-child(1)').each(function() {
+    $(this).next().next().next().next().next().next().next().next().after(
+		$('<td/>')
+	);
+});
+
+// Add extra search links
 $('table.sickbeardTable tbody tr td:last-child a.epSearch').each(function() {
-	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(180deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
 	var showdetails = $(this).attr('href').match( new RegExp('.+season=([0-9]+)&episode=([0-9]+)'));
 	var season = showdetails[1];
 	var episode = showdetails[2];
 	if ( season.length == 1 ) season = '0' + season;
 	if ( episode.length == 1 ) episode = '0' + episode;
-	var url = ($('#content > h1.title > a').text() + ' S' + season + 'E' + episode).replace(' ', '+');
-	url = 'http://nzbindex.nl/search/?q=' + url + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
-	
-	$(this).before($('<a/>').attr('href', url).append(img));
+	var episode = ($('#content > h1.title > a').text() + ' S' + season + 'E' + episode).replace(' ', '+').replace('&', ' ');
+
+	// Add nzbindex search
+	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(270deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
+	url = 'http://nzbindex.nl/search/?q=' + episode + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
+	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
+
+	// Add TPB search
+	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
+	url = 'https://eztv.it/search/?SearchString1=' + episode;
+	var $form = $('<form/>').attr('action', url).attr('target','blank').attr('method','POST');
+	$form.attr('class', 'mysearch').append($('<input/>').attr('type', 'hidden').attr('name', 'SearchString1').attr('value', episode));
+	$form.append($('<button/>').attr('style', 'background: url(' + $(this).find('img').attr('src') + ')' ));
+	$(this).closest('td').prev().append($form);
 });
+
+// add TPB search
+
 
 // add styling
 $('head').append(
 	$('<style/>').append(' \
 	.button-watch {  } \
 	tr.watched { background: ' + watched_color + '; }  \
+	form.mysearch { display: inline; } \
+	form.mysearch button { height: 16px; width: 16px; border: none; } \
 	')
 );
 
