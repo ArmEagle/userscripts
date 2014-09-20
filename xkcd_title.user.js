@@ -12,13 +12,11 @@
 // @exclude http://www.xkcd.com/about
 // ==/UserScript==
 
-var image = document.getElementById("middleContent").getElementsByTagName('img')[0];
+var image = document.getElementById("comic").getElementsByTagName('img')[0];
 
-// create a div that is invisible and becomes visible when the mouse hovers over it
+// create a div
 var title_text = document.createElement("div");
-title_text.setAttribute('style', 'margin: auto; width:70%; color:#ffffff; font-size:small; font-style:italic');
-title_text.setAttribute('onMouseOver','this.style.color=\'#000000\'');
-title_text.setAttribute('onMouseOut', 'this.style.color=\'#ffffff\'');
+title_text.setAttribute('style', 'margin: auto; width:70%; font-size:small; font-style:italic');
 
 // apply a bold "Title: "
 var title_header = document.createElement("b");

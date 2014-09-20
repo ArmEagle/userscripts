@@ -169,14 +169,14 @@ $('table.sickbeardTable tbody tr td:last-child a.epSearch').each(function() {
 	var episode = showdetails[2];
 	if ( season.length == 1 ) season = '0' + season;
 	if ( episode.length == 1 ) episode = '0' + episode;
-	var episode = ($('#content > h1.title > a').text() + ' S' + season + 'E' + episode).replace(' ', '+').replace('&', ' ');
+	var episode = ($('#content > h1.title > a').text() + ' S' + season + 'E' + episode).replace('&', ' ');
 
 	// Add nzbindex search
 	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(270deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
-	url = 'http://nzbindex.nl/search/?q=' + episode + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
+	url = 'http://nzbindex.nl/search/?q=' + episode.replace(' ', '+') + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
 	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
 
-	// Add TPB search
+	// Add EZTV search
 	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
 	url = 'https://eztv.it/search/?SearchString1=' + episode;
 	var $form = $('<form/>').attr('action', url).attr('target','blank').attr('method','POST');
