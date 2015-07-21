@@ -3,8 +3,8 @@
 // @namespace      http://armeagle.nl
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
-// @updateURL      http://userscripts.org/scripts/source/59111.meta.js
-// @version        2.3.4
+// @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
+// @version        2.3.5
 // @grant          none
 // ==/UserScript==
 
