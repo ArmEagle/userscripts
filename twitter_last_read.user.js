@@ -4,26 +4,29 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      http://userscripts.org/scripts/source/59111.meta.js
-// @version        2.3.3
+// @version        2.3.4
 // @grant          none
 // ==/UserScript==
 
 // This work is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License by Alex Haan (http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
 /*
-Adds buttons to the top tab list (with the Home and Connect buttons). Clicking the icon on the left that mark all (visible) tweets as read and stores that. Upon clicking the second icon the right the page will scroll down until the last read tweet is found (or stops at the 100th tweet).
+ - Adds buttons to the top tab list (with the Home and Connect buttons). Clicking the icon on the left that mark all (visible) tweets as read and stores that. Upon clicking the second icon the right the page will scroll down until the last read tweet is found (or stops at the 100th tweet).
 
 Whenever read tweets are loaded and displayed they will be marked (background color changed). Also works separately on the comments tab.
 
 If you like the script, or not ... please leave a comment.
 
-* Only tested on Firefox.
- */
+ - Since about June 2015 Twitter is using some embedded form of inline-quote-retweeting. You cannot open the retweeted tweet manually in a separate tab, but clicking that tweet will reload the page to that tweet (the containing div has an href attribute).
+ I'm adding some way to open that tweet in a new tab/window.
+
+ - Only tested on Firefox.
+*/
 
 
 function DOM_script() {
-//	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
-//	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
+	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
+	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
 	
 	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
 	script.setAttribute('type', 'text/javascript');
@@ -113,14 +116,31 @@ function DOM_script() {
 	}
 
 	AEG.tweetInsertHandler = function(event) {
+		var tweet = event.target;
+		if ( ! tweet || ! tweet.className || tweet.className.indexOf("stream-item") < 0) {
+			return;
+		}
+		//AEG.quotedRetweetLinkifier(tweet);
 		// mark if old
 		var lastReadID = AEG.getLastUrlReadID();
-		if ( lastReadID != null && event.target.className && event.target.className.indexOf("stream-item") >= 0 ) {
-			AEG.testAndMarkTweet(event.target, MyBigNumber(lastReadID));
+		if ( lastReadID != null ) {
+			AEG.testAndMarkTweet(tweet, MyBigNumber(lastReadID));
 			//console.log('post');
 		} else {
 			//console.log(['post', event.target, event.target.className.indexOf("stream-item")]);
 		}
+	}
+	
+	// handle quoted retweets and allow opening of the base tweet manually.
+	AEG.quotedRetweetLinkifier = function(tweet) {
+		console.log(['aa', tweet, typeof tweet ]);
+		/*return;
+		// find quotedTweet
+		var quotedTweet = tweet.querySelector('.QuoteTweet');
+		if ( ! quotedTweet ) {
+			return;
+		}
+		console.log(['bb', tweet, quotedTweet]);*/
 	}
 
 	// lookup the last tweet and store that ID in a cookie, then color all those tweets as read
@@ -173,6 +193,7 @@ function DOM_script() {
 				// happens with newly injected tweets. Since they're new, they don't have to be marked anyway.
 				return;
 			}
+			//console.log(['tt', element]);
 
 			// mark tweet if it's old
 			if ( tweetID <= id ) {
@@ -400,7 +421,8 @@ function CSS_script() {
 	var style = document.getElementsByTagName('head')[0].appendChild(document.createElement('style'));
 	style.textContent = "\
 	.stream-item.is-read {\
-		opacity: 0.5;\
+		opacity: 0.8;\
+		background: #e5e5e5;\
 		border-top: 1px solid #e8e8e8;\
 		margin-top: 20px !important;\
 	}\
