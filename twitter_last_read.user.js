@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.3.5
+// @version        2.3.6
 // @grant          none
 // ==/UserScript==
 
@@ -23,14 +23,13 @@ If you like the script, or not ... please leave a comment.
  - Only tested on Firefox.
 */
 
-
 function DOM_script() {
 	// 2014-08-13: Twitter introduced (more) hotkeys that now break normal interaction (Ctrl+r), fixing that!
 	window.addEventListener("keypress", function(event) { event.stopPropagation(); }, true);
 	
-	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
-	script.setAttribute('type', 'text/javascript');
-	return script.textContent=DOM_script.toString().replace(/[\s\S]*"\$1"\);([\s\S]*)}/,"$1");
+//	var script = document.getElementsByTagName('head')[0].appendChild(document.createElement('script'));
+//	script.setAttribute('type', 'text/javascript');
+//	return script.textContent=DOM_script.toString().replace(/[\s\S]*"\$1"\);([\s\S]*)}/,"$1");
 
 	// create container Object to prevent variables and function from going global
 	var AEG = {};
@@ -60,7 +59,6 @@ function DOM_script() {
 	AEG.addButtonBar = function() {
 		// add "Mark All Read" to the top of the timeline, next to the Tweets header
 		var buttonbar = document.querySelector('#global-actions');
-
 		var li_buttonbar = document.createElement('li');
 		li_buttonbar.setAttribute('id', 'AEG-button-bar');
 
