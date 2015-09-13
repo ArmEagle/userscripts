@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.3.6
+// @version        2.4
 // @grant          none
 // ==/UserScript==
 
@@ -420,8 +420,9 @@ function CSS_script() {
 	style.textContent = "\
 	.stream-item.is-read {\
 		opacity: 0.8;\
-		background: #e5e5e5;\
+		#background: #e5e5e5;\
 		border-top: 1px solid #e8e8e8;\
+		border-left: 3px solid #3377ee;\
 		margin-top: 20px !important;\
 	}\
 	.stream-item.is-read:hover {\
