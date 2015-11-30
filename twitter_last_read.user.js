@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.4
+// @version        2.5
 // @grant          none
 // ==/UserScript==
 
