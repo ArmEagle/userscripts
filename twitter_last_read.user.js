@@ -4,7 +4,7 @@
 // @description    Keep track of your read tweets.
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.5.1
+// @version        2.5.2
 // @grant          none
 // ==/UserScript==
 
@@ -149,7 +149,9 @@ function DOM_script() {
 			var oldestTweetID = AEG.getTweetIDFromElement(lastChild);
 			if ( oldestTweetID <= AEG.getLastUrlReadID() || !AEG.markTweetsUseConfirm || confirm('Are you sure you want to mark all tweets read? \nThe last read tweet is not loaded.') ) {
 				var firstChild = document.querySelector('.stream > .stream-items > .stream-item:first-child');
-				while (firstChild.querySelector('div.tweet').hasAttribute('data-promoted')) {
+				while (firstChild.querySelector('div.tweet').hasAttribute('data-promoted')
+					|| firstChild.className.indexOf('before-expanded') >= 0
+					|| firstChild.className.indexOf('has-recap') >= 0) {
 					firstChild = firstChild.nextElementSibling;
 				}
 				var lastTweetID = AEG.getTweetIDFromElement(firstChild);
