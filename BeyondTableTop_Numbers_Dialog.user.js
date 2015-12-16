@@ -4,7 +4,8 @@
 // @description Adds a dialog popup to any number inputs
 // @include     http://www.beyondtabletop.com/app#/sheet*
 // @updateURL   https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
-// @version     1
+// @downloadURL   https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
+// @version     1.01
 // @grant       none
 // ==/UserScript==
 
