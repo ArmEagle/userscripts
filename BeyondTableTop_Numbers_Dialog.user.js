@@ -5,7 +5,7 @@
 // @include       http://www.beyondtabletop.com/app#/sheet*
 // @updateURL     https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
 // @downloadURL   https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
-// @version       1.03
+// @version       1.04
 // @grant         none
 // ==/UserScript==
 
@@ -19,7 +19,6 @@
 		this.numbersContainer = null;
 		
 		this.init();
-		console.log('NumbersDialog loaded');
 	}
 		
 	NumbersDialog.prototype.buildDialog = function() {
