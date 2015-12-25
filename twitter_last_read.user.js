@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.5.3
+// @version        2.5.4
 // @grant          none
 // ==/UserScript==
 
@@ -266,7 +266,8 @@ function DOM_script() {
 			lastChild.scrollIntoView(false);
 		} else {
 			// the last-read tweet is on the current page already, find it and scroll to it
-			var lastReadTweet = document.querySelector('.stream > .stream-items > .stream-item.is-read:not([data-component-context="follow_activity"])');
+			// Ignore retweets and the "while you were away" block.
+			var lastReadTweet = document.querySelector('.stream > .stream-items > .stream-item.is-read:not([data-component-context="follow_activity"]):not(.has-recap)');
 			lastReadTweet.scrollIntoView(false);
 		}
 
