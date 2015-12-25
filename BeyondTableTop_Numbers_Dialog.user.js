@@ -2,10 +2,10 @@
 // @name          BeyondTableTop Numbers Dialog
 // @namespace     armeagle.nl
 // @description   Adds a dialog popup to any number inputs
-// @include       http://www.beyondtabletop.com/app#/sheet*
+// @include       http://www.beyondtabletop.com/app*
 // @updateURL     https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
 // @downloadURL   https://raw.githubusercontent.com/ArmEagle/userscripts/master/BeyondTableTop_Numbers_Dialog.user.js
-// @version       1.04
+// @version       1.05
 // @grant         none
 // ==/UserScript==
 
