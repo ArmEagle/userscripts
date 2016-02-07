@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.5.4
+// @version        2.5.5
 // @grant          none
 // ==/UserScript==
 
@@ -14,12 +14,9 @@
 /*
  - Adds buttons to the top tab list (with the Home and Connect buttons). Clicking the icon on the left that mark all (visible) tweets as read and stores that. Upon clicking the second icon the right the page will scroll down until the last read tweet is found (or stops at the 100th tweet).
 
-Whenever read tweets are loaded and displayed they will be marked (background color changed). Also works separately on the comments tab.
+Whenever read tweets are loaded and displayed they will be marked (background color changed). Also works separately on the notifications tab.
 
-If you like the script, or not ... please leave a comment.
-
- - Since about June 2015 Twitter is using some embedded form of inline-quote-retweeting. You cannot open the retweeted tweet manually in a separate tab, but clicking that tweet will reload the page to that tweet (the containing div has an href attribute).
- I'm adding some way to open that tweet in a new tab/window.
+ - Hides "While you were away" and "Who to follow" sections.
 
  - Only tested on Firefox.
 */
@@ -465,6 +462,9 @@ function CSS_script() {
 		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAC5ElEQVRIidWVT2gdVRTGf18IEksIQbqQUMpDshEqSKAUuhRDpahQKll2EXiDoKLiuypG5jJTqi3zCm8p80AQ3RjUIkqwRBQ3QikIUtyIiyAlZFFKCSGELPK5ePPa92doirseuByY+53vO+fMuffC4246DJCEOAt+CXTK9jEkBJuGm4K1ssju/i+BHjHRdgIckcAeg+0Bnwti2c7vPLJAs5UuSLoGHMfsGn+DdF2wARwYGphFiSVgGtiyfb7bzn8/VCAJccH2r8CMpFXbb3fb+VZtla30KOIq6AKwa3txVGRIIAlxxvafQAP4RNJKWWR13IPVIvGhzafAFvBcd6BdkyP4FUkN4DvwSllkJCHO256qI5e0XxbZ30krvQx6VuICkAFv9DET9zMJcdr268CezVtlkQNg/D1wS9KtGr8OULZzhN+zvQMsJyE+NVaB7BcNM7ZXu+1880EPFcCz1QA9Y/tJ0F+V+k4fV7bzO0krXbW9DJwFvhpukXRSAPb6YBvKIlsDSFrpJNJvwBSQlUW2X9OzdcEycLIvMDGwPWcb90Zx3KSW7dPAAhDrILY3Kj/X/zYogCQkTYzEkYT4PJBJ94fu/STE02M50IsdwA0J3HbvqDYGg5ohTtn+0uYJ21Rr0vYXzVY6PaLQqDhu1wncqMo7MxzDReBEP6l+dpLmQcVIEWeq/Rt1Ar9Iuifp5WYrPQ6QhHTG9gTQ6S/bHUkd2x3wXhLi0Qr7NPAasAv8NJDgA0tCvGjzsfAa4pWyyA94BEtCxPbXwBLQ6bbzd+sqALgi8Y/hrNHVJMSxH15HDlyStAT8K2nobhkiKItsB/ucpLuCd4AfmqHXrnrydA74FvgI2AbOlUV2bxBTf12HeAL7GmgevA/8KOl6NecHkhq2F4FX6R28DUnnyyL7Y5TrYQ/ONPCB7TeBWUnYZsjDtuAz4FJZZNt1PIc+mc0QjwheAE7ZHAMjaRO4CfxcFtnOIRSPuf0HkqRKoOco5hIAAAAASUVORK5CYII=);\
 	}\
 	.separated-module.has-recap {\
+		display: none;\
+	}\
+	li[data-component-context=suggest_who_to_follow] {\
 		display: none;\
 	}\
 	";
