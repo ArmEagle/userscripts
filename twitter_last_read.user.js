@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.5.5
+// @version        2.6
 // @grant          none
 // ==/UserScript==
 
@@ -17,6 +17,7 @@
 Whenever read tweets are loaded and displayed they will be marked (background color changed). Also works separately on the notifications tab.
 
  - Hides "While you were away" and "Who to follow" sections.
+ - Adds overlay to embedded YouTube videos so you can simply open them in a new tab/window. Can be disabled with the 'addYoutubeOverlay' setting.
 
  - Only tested on Firefox.
 */
@@ -33,6 +34,8 @@ function DOM_script() {
 	var AEG = {};
 	// Whether to show the confirm dialog when marking tweets read (for when the last-read tweet isn't loaded).
 	AEG.markTweetsUseConfirm = true;
+	// Whether to add an overlay to embedded YouTube videos that forces opening of the youtube video in a new tab.
+	AEG.addYoutubeOverlay = true;
 
 	AEG.debug = false;
 	// is scrolling
@@ -163,7 +166,11 @@ function DOM_script() {
 		event.stopPropagation();
 	}
 
-	// mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also
+	/*
+	 * Multiple actions on tweets:
+	 * - mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also
+	 * - make YouTube videos clickable.
+	 */
 	AEG.markRead = function(id, all) {
 	    if (arguments.length < 2) {
 			all = false;
@@ -175,6 +182,7 @@ function DOM_script() {
 				var tweet = tweets[ind];
 				if (all || ! tweet.querySelector('div.tweet').hasAttribute('data-promoted')) {
 					AEG.testAndMarkTweet(tweets[ind], id);
+					AEG.makeClickableYoutube(tweets[ind]);
 				}
 			}
 		} catch (exc) {
@@ -388,6 +396,39 @@ function DOM_script() {
 		}
 		return MyBigNumber(tweetID);
 	}
+	
+	/**
+	 * Make youtube embeds in tweets clickable such that you can open it in a new tab instead of opening
+	 * a local version (first).
+	 * Lazy overlay so the link isn't somehow hijacked. That completely disables the default funtionality.
+	 *  Whereas the initial goal was to only have middle-click do its default job and keep the original
+	 *  functionality on normal click. But I won't be using that anyway.
+	 * param element DOM_Element : tweet element to look for youtube video's in.
+	 */
+	AEG.makeClickableYoutube = function(element) {
+		if (!AEG.addYoutubeOverlay) { return; }
+		
+		var player = element.querySelector('.card-type-player');
+		if (!player) { return; }
+		
+		var url = player.getAttribute('data-card-url');
+		if (!url) { return; }
+		
+		var el_a = document.createElement('a');
+		el_a.setAttribute('href', url);
+		el_a.setAttribute('target', '_blank');
+		el_a.setAttribute('class', 'aeg-tweet-youtube-link');
+		// store parent of element so we can wrap it in our el_a.
+		var el_parent = player.parentNode;
+		el_a.appendChild(player);
+		el_parent.appendChild(el_a);
+		
+		// add the transparent overlay.
+		el_overlay = document.createElement('div');
+		el_overlay.setAttribute('class', 'aeg-tweet-youtube-overlay');
+		el_a.appendChild(el_overlay);
+		console.log(el_a);
+	}
 
 	// mark all read tweets (static content loaded with the page itself)
 	var lastReadID = AEG.getLastUrlReadID();
@@ -460,6 +501,18 @@ function CSS_script() {
 	}\
 	#AEG-button-bar #mark-all {\
 		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAC5ElEQVRIidWVT2gdVRTGf18IEksIQbqQUMpDshEqSKAUuhRDpahQKll2EXiDoKLiuypG5jJTqi3zCm8p80AQ3RjUIkqwRBQ3QikIUtyIiyAlZFFKCSGELPK5ePPa92doirseuByY+53vO+fMuffC4246DJCEOAt+CXTK9jEkBJuGm4K1ssju/i+BHjHRdgIckcAeg+0Bnwti2c7vPLJAs5UuSLoGHMfsGn+DdF2wARwYGphFiSVgGtiyfb7bzn8/VCAJccH2r8CMpFXbb3fb+VZtla30KOIq6AKwa3txVGRIIAlxxvafQAP4RNJKWWR13IPVIvGhzafAFvBcd6BdkyP4FUkN4DvwSllkJCHO256qI5e0XxbZ30krvQx6VuICkAFv9DET9zMJcdr268CezVtlkQNg/D1wS9KtGr8OULZzhN+zvQMsJyE+NVaB7BcNM7ZXu+1880EPFcCz1QA9Y/tJ0F+V+k4fV7bzO0krXbW9DJwFvhpukXRSAPb6YBvKIlsDSFrpJNJvwBSQlUW2X9OzdcEycLIvMDGwPWcb90Zx3KSW7dPAAhDrILY3Kj/X/zYogCQkTYzEkYT4PJBJ94fu/STE02M50IsdwA0J3HbvqDYGg5ohTtn+0uYJ21Rr0vYXzVY6PaLQqDhu1wncqMo7MxzDReBEP6l+dpLmQcVIEWeq/Rt1Ar9Iuifp5WYrPQ6QhHTG9gTQ6S/bHUkd2x3wXhLi0Qr7NPAasAv8NJDgA0tCvGjzsfAa4pWyyA94BEtCxPbXwBLQ6bbzd+sqALgi8Y/hrNHVJMSxH15HDlyStAT8K2nobhkiKItsB/ucpLuCd4AfmqHXrnrydA74FvgI2AbOlUV2bxBTf12HeAL7GmgevA/8KOl6NecHkhq2F4FX6R28DUnnyyL7Y5TrYQ/ONPCB7TeBWUnYZsjDtuAz4FJZZNt1PIc+mc0QjwheAE7ZHAMjaRO4CfxcFtnOIRSPuf0HkqRKoOco5hIAAAAASUVORK5CYII=);\
+	}\
+	.aeg-tweet-youtube-link {\
+		position:relative;\
+		width:100%;\
+		display:inline-block;\
+	}\
+	.aeg-tweet-youtube-overlay {\
+		position: absolute;\
+		left:0;\
+		top:0;\
+		width:100%;\
+		height:100%;\
 	}\
 	.separated-module.has-recap {\
 		display: none;\
