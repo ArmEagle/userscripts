@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.6
+// @version        2.6.1
 // @grant          none
 // ==/UserScript==
 
@@ -128,6 +128,8 @@ function DOM_script() {
 		} else {
 			//console.log(['post', event.target, event.target.className.indexOf("stream-item")]);
 		}
+		// YouTube clickable
+		AEG.makeClickableYoutube(tweet);
 	}
 	
 	// handle quoted retweets and allow opening of the base tweet manually.
@@ -167,9 +169,10 @@ function DOM_script() {
 	}
 
 	/*
-	 * Multiple actions on tweets:
-	 * - mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also
-	 * - make YouTube videos clickable.
+	 * Mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also.
+	 * Also make tweets with YouTube video clickable.
+	 * param id MyBigNumber or null
+	 * param all boolean default false
 	 */
 	AEG.markRead = function(id, all) {
 	    if (arguments.length < 2) {
@@ -180,10 +183,17 @@ function DOM_script() {
 			var tweets = document.querySelectorAll('.stream > .stream-items > .stream-item');
 			for ( var ind = tweets.length-1; ind >= 0; ind-- ) {
 				var tweet = tweets[ind];
-				if (all || ! tweet.querySelector('div.tweet').hasAttribute('data-promoted')) {
-					AEG.testAndMarkTweet(tweets[ind], id);
-					AEG.makeClickableYoutube(tweets[ind]);
+				// skip non-tweets
+				if ( tweet.className.indexOf('separated-module') >= 0 ) {
+					continue;
 				}
+				if ( null !== id ) {
+					if (all || ! tweet.querySelector('div.tweet').hasAttribute('data-promoted')) {
+						AEG.testAndMarkTweet(tweet, id);
+					}
+				}
+				// YouTube clickable
+				AEG.makeClickableYoutube(tweet);
 			}
 		} catch (exc) {
 			AEG.debugHandleException('AEG.markAllRead', exc);
@@ -201,6 +211,7 @@ function DOM_script() {
 			}
 			//console.log(['tt', element]);
 
+			
 			// mark tweet if it's old
 			if ( tweetID <= id ) {
 				try {
@@ -403,7 +414,7 @@ function DOM_script() {
 	 * Lazy overlay so the link isn't somehow hijacked. That completely disables the default funtionality.
 	 *  Whereas the initial goal was to only have middle-click do its default job and keep the original
 	 *  functionality on normal click. But I won't be using that anyway.
-	 * param element DOM_Element : tweet element to look for youtube video's in.
+	 * param element DOM_Element : tweet element to look for youtube video in.
 	 */
 	AEG.makeClickableYoutube = function(element) {
 		if (!AEG.addYoutubeOverlay) { return; }
@@ -413,6 +424,9 @@ function DOM_script() {
 		
 		var url = player.getAttribute('data-card-url');
 		if (!url) { return; }
+		
+		// no duplicates on rerun
+		//if ( pla)
 		
 		var el_a = document.createElement('a');
 		el_a.setAttribute('href', url);
@@ -427,14 +441,11 @@ function DOM_script() {
 		el_overlay = document.createElement('div');
 		el_overlay.setAttribute('class', 'aeg-tweet-youtube-overlay');
 		el_a.appendChild(el_overlay);
-		console.log(el_a);
 	}
 
 	// mark all read tweets (static content loaded with the page itself)
 	var lastReadID = AEG.getLastUrlReadID();
-	if ( lastReadID != null ) {
-		AEG.markRead(MyBigNumber(lastReadID), false);
-	}
+	AEG.markRead(MyBigNumber(lastReadID), false);
 
 	function MyBigNumber(value) {
 		function BigNumber(value) {
@@ -524,19 +535,19 @@ function CSS_script() {
 }
 CSS_script();
 
-// delay launching script till the sidebar is loaded; to prevent error and inject after the right element is found (as alternative to too many @includes)
-var delayInterval = window.setInterval(function() {
-	trigger = document.querySelector('.stream > .stream-items > .stream-item:first-child div.tweet')
+function init() {
+	trigger = document.querySelector('.stream > .stream-items > .stream-item:first-child div.tweet');
 	if ( trigger != null ) {
-		window.clearInterval(delayInterval);
 //	if (document.querySelector('.stream > .stream-items > .stream-item:first-child div.tweet')) {
 		try {
 			DOM_script();
+			console.log('twitter last read user is done loading');
 		} catch(e) {
 			console.log(e);
 		}
 //	}
 	} else {
-		//console.log('delay');
+		window.setTimeout(function() {init();}, 1000);
 	}
-}, 1000);
+}
+init();
