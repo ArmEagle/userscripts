@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.6.1
+// @version        2.6.2
 // @grant          none
 // ==/UserScript==
 
@@ -417,6 +417,7 @@ function DOM_script() {
 	 * param element DOM_Element : tweet element to look for youtube video in.
 	 */
 	AEG.makeClickableYoutube = function(element) {
+		// Check script setting
 		if (!AEG.addYoutubeOverlay) { return; }
 		
 		var player = element.querySelector('.card-type-player');
@@ -426,7 +427,9 @@ function DOM_script() {
 		if (!url) { return; }
 		
 		// no duplicates on rerun
-		//if ( pla)
+		if (element.querySelector('.aeg-tweet-youtube-link')) {
+			return;
+		}
 		
 		var el_a = document.createElement('a');
 		el_a.setAttribute('href', url);
