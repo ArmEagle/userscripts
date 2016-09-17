@@ -2,13 +2,14 @@
 // @name        Sick Beard view and track
 // @namespace   armeagle.nl
 // @include     http://*:8081/home/displayShow?show=*
-// @version     1.03
+// @version     1.04
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
 
 (function() {
-var path_replace = {'/volume1/Data/' : 'file:///H:/'};
+// Set replace depending on how the directory is mounted.
+var path_replace = {'/volume1/Series/' : 'file:///I:/'};
 var watched_color = '#aaaaff';
 
 // add querystring getter
@@ -19,18 +20,20 @@ function getQueryStringParameter(name) {
 
 var showId = getQueryStringParameter('show');
 
-// change filename to link
+/** Change filename to link **/
+// Build base path to which the filenames can be added.
 var basePath = $('div#summary table tbody tr td:contains(Location:)').next()[0].textContent;
 $.each(path_replace, function(k, v) {
 	basePath = basePath.replace(k, v);
 });
 
-
-$('table.sickbeardTable tbody tr td:nth-child(7)').each(function() {
+// Loop through all filename cells and turn them to a link.
+$('table.sickbeardTable2 tbody tr td.col-filename').each(function() {
     var fileName = $(this).text().trim();
     if ( ! fileName || fileName.length <= 0 ) {
         return;
     }
+
     var filePath = basePath + '/' + fileName;
     $(this).empty().append(
         $('<a/>').attr('href', filePath)
@@ -44,7 +47,7 @@ $('table.sickbeardTable tbody tr td:nth-child(7)').each(function() {
 // end
 
 // add watch(ed) button and states
-$('table.sickbeardTable tbody tr td[colspan=9]').each(function() {
+$('table.sickbeardTable2 tbody tr td[colspan=9]').each(function() {
 	if ( ! $(this).closest('tr').hasClass('seasonheader') ) {
 		$(this).attr('colspan', 10);
 		return;
@@ -61,13 +64,13 @@ $('table.sickbeardTable tbody tr td[colspan=9]').each(function() {
 });
 
 // add extra column to header rows
-$('table.sickbeardTable tbody tr th:nth-child(1)').each(function() {
+$('table.sickbeardTable2 tbody tr th:nth-child(1)').each(function() {
     $(this).next().next().next().next().next().after(
         $('<th/>')
     )
 });
 
-$('table.sickbeardTable tbody tr td:nth-child(1)').each(function() {
+$('table.sickbeardTable2 tbody tr td:nth-child(1)').each(function() {
     var button = createButton(showId, $(this).find('input').attr('id'));
 
     if ( button && button.hasClass('watched') ) {
@@ -139,7 +142,7 @@ function handleKeyEvent(event) {
 			}
 		break;
 		case 77: // m
-			element.closest('td').prev().find('button').trigger('click'); // toggle marked
+			element.closest('td').prev().prev().find('button').trigger('click'); // toggle marked
 		break;
 		default:
 			return true;
@@ -150,20 +153,20 @@ function handleKeyEvent(event) {
 // end
 
 // Add column for extra search links
-$('table.sickbeardTable tbody tr th:nth-child(1)').each(function() {
-    $(this).next().next().next().next().next().next().next().next().after(
+$('table.sickbeardTable2 tbody tr th:nth-child(1)').each(function() {
+    $(this).next().next().next().next().next().next().next().next().next().after(
         $('<th/>')
     )
 });
 
-$('table.sickbeardTable tbody tr td:nth-child(1)').each(function() {
-    $(this).next().next().next().next().next().next().next().next().after(
+$('table.sickbeardTable2 tbody tr td:nth-child(1)').each(function() {
+    $(this).next().next().next().next().next().next().next().next().next().after(
 		$('<td/>')
 	);
 });
 
 // Add extra search links
-$('table.sickbeardTable tbody tr td:last-child a.epSearch').each(function() {
+$('table.sickbeardTable2 tbody tr td:last-child a.epSearch').each(function() {
 	var showdetails = $(this).attr('href').match( new RegExp('.+season=([0-9]+)&episode=([0-9]+)'));
 	var season = showdetails[1];
 	var episode = showdetails[2];
@@ -173,16 +176,29 @@ $('table.sickbeardTable tbody tr td:last-child a.epSearch').each(function() {
 
 	// Add nzbindex search
 	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(270deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
-	url = 'http://nzbindex.nl/search/?q=' + episode.replace(' ', '+') + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
+	m_episode = episode.replace(' ', '+').replace(/[\(\)\[\]']/g,'');
+	
+	url = 'http://nzbindex.nl/search/?q=' + m_episode + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
 	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
 
-	// Add EZTV search
-	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search on NzbIndex');
-	url = 'https://eztv.it/search/?SearchString1=' + episode;
-	var $form = $('<form/>').attr('action', url).attr('target','blank').attr('method','POST');
+	// Add isohunt search
+	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search on Isohunt');
+	
+	m_episode = episode + ' 1080p';
+	m_episode = m_episode.replace(/ /g, '+').replace(/[\(\)\[\]']/g,'');
+	
+	//url = 'http://isohunt.to/torrents/advancedSearch?yform_advanced_search=1&SearchForm[allWords]='
+	//+ m_episode
+	//+ '&SearchForm[category]=0&SearchForm[language]=0&SearchForm[seederCount]=1&submit=Search';
+	url = 'https://isohunt.to/torrents/?ihq=' + m_episode;
+	
+	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
+	/*
+	var $form = $('<form/>').attr('action', url).attr('target','blank').attr('method','GET');
 	$form.attr('class', 'mysearch').append($('<input/>').attr('type', 'hidden').attr('name', 'SearchString1').attr('value', episode));
 	$form.append($('<button/>').attr('style', 'background: url(' + $(this).find('img').attr('src') + ')' ));
 	$(this).closest('td').prev().append($form);
+	*/
 });
 
 // add TPB search
@@ -193,6 +209,8 @@ $('head').append(
 	$('<style/>').append(' \
 	.button-watch {  } \
 	tr.watched { background: ' + watched_color + '; }  \
+	td.col-filename a { text-decoration: underline; } \
+	td.col-filename:hover a { text-decoration: overline; } \
 	form.mysearch { display: inline; } \
 	form.mysearch button { height: 16px; width: 16px; border: none; } \
 	')
