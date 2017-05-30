@@ -5,7 +5,7 @@
 // @include        http*://twitter.com*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.6.2
+// @version        2.7
 // @grant          none
 // ==/UserScript==
 
@@ -134,7 +134,7 @@ function DOM_script() {
 	
 	// handle quoted retweets and allow opening of the base tweet manually.
 	AEG.quotedRetweetLinkifier = function(tweet) {
-		console.log(['aa', tweet, typeof tweet ]);
+		//console.log(['aa', tweet, typeof tweet ]);
 		/*return;
 		// find quotedTweet
 		var quotedTweet = tweet.querySelector('.QuoteTweet');
@@ -160,7 +160,7 @@ function DOM_script() {
 				var lastTweetID = AEG.getTweetIDFromElement(firstChild);
 
 				AEG.setLastUrlReadID(lastTweetID);
-				AEG.markRead(lastTweetID, true);
+				AEG.markRead(lastTweetID);
 			}
 		} catch (exc) {
 			AEG.debugHandleException('AEG.setLastRead', exc);
@@ -169,18 +169,14 @@ function DOM_script() {
 	}
 
 	/*
-	 * Mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will be marked also.
+	 * Mark tweets with ID equal or lower than 'id' as read. If 'true' is passed as second parameter, promoted tweets will not be marked as we'l' hide them anyway.
 	 * Also make tweets with YouTube video clickable.
 	 * param id MyBigNumber or null
-	 * param all boolean default false
 	 */
-	AEG.markRead = function(id, all) {
-	    if (arguments.length < 2) {
-			all = false;
-		}
-
+	AEG.markRead = function(id) {
 		try {
 			var tweets = document.querySelectorAll('.stream > .stream-items > .stream-item');
+			// from last to first
 			for ( var ind = tweets.length-1; ind >= 0; ind-- ) {
 				var tweet = tweets[ind];
 				// skip non-tweets
@@ -188,9 +184,7 @@ function DOM_script() {
 					continue;
 				}
 				if ( null !== id ) {
-					if (all || ! tweet.querySelector('div.tweet').hasAttribute('data-promoted')) {
-						AEG.testAndMarkTweet(tweet, id);
-					}
+					AEG.testAndMarkTweet(tweet, id);
 				}
 				// YouTube clickable
 				AEG.makeClickableYoutube(tweet);
@@ -206,6 +200,14 @@ function DOM_script() {
 		try {
 			var tweetID = AEG.getTweetIDFromElement(element);
 			if (tweetID == 0) {
+				// could be liked tweet, test (again)
+				if (AEG.isLikedTweet(element)) {
+					element.classList.add('is-read-liked');
+				}
+				// skip promoted tweets
+				if (AEG.isPromotedTweet(element)) {
+					element.classList.add('is-promoted');
+				}
 				// happens with newly injected tweets. Since they're new, they don't have to be marked anyway.
 				return;
 			}
@@ -282,8 +284,8 @@ function DOM_script() {
 			lastChild.scrollIntoView(false);
 		} else {
 			// the last-read tweet is on the current page already, find it and scroll to it
-			// Ignore retweets and the "while you were away" block.
-			var lastReadTweet = document.querySelector('.stream > .stream-items > .stream-item.is-read:not([data-component-context="follow_activity"]):not(.has-recap)');
+			// Ignore retweets, liked tweets and the "while you were away" block.
+			var lastReadTweet = document.querySelector('.stream > .stream-items > .stream-item.is-read:not([data-component-context="follow_activity"]):not(.has-recap):not(.is-liked)');
 			lastReadTweet.scrollIntoView(false);
 		}
 
@@ -389,13 +391,23 @@ function DOM_script() {
 	// get the correct tweet ID from a tweet div
 	/**
 	 * param element DOM_Element : to get the ID from
-	 * param use_base boolean    : return the 'data-item-id' even when this element is a retweet. This is needed for checking whether the last-read tweet is in view, because the retweet-id will be lower than the data-item-id
+	 * param use_base boolean    : return the 'data-item-id' even when this element is a retweet. This is needed for checking whether the last-read tweet is in view, because the retweet-id will be higher than the data-item-id
+	 * return int|MyBigNumber : MyBigNumber for normal tweets, or 0
 	 */
 	AEG.getTweetIDFromElement = function(element, use_base) {
 		var child = element.querySelector('div.original-tweet');
 		if ( ! child || ! child.hasAttribute('data-item-id')) {
 			return 0;
 		}
+		// Ignore liked tweets
+		if (AEG.isLikedTweet(element)) {
+			return 0;
+		}
+		// Ignore promoted tweets
+		if (AEG.isPromotedTweet(element)) {
+			return 0;
+		}
+		
 		var tweetID = child.getAttribute('data-item-id').replace('-promoted', ''); //default value
 		if ( tweetID.indexOf('_') > 0 ) {
 			tweetID = tweetID.split('_')[3]; //@todo don't know what this is for anymore
@@ -406,6 +418,24 @@ function DOM_script() {
 			}
 		}
 		return MyBigNumber(tweetID);
+	}
+	
+	/**
+	 * param element DOM_Element : root tweet element to test
+	 * return boolean : true if the tweet is a retweet (and the tweet id can be very old, so needs special treatment).
+	 */
+	AEG.isLikedTweet = function(element) {
+		// Test liked tweets. See https://github.com/ArmEagle/userscripts/issues/3 
+		var context = element.querySelector('.context');
+		return context && context.textContent.indexOf(' liked') >= 0;
+	}
+	
+	/**
+	 * param element DOM_Element : root tweet element to test
+	 * return boolean : true if the tweet is a promoted tweet
+	 */
+	AEG.isPromotedTweet = function(element) {
+		return element.querySelector('div.tweet').hasAttribute('data-promoted');
 	}
 	
 	/**
@@ -476,10 +506,11 @@ function CSS_script() {
 	style.textContent = "\
 	.stream-item.is-read {\
 		opacity: 0.8;\
-		#background: #e5e5e5;\
 		border-top: 1px solid #e8e8e8;\
 		border-left: 3px solid #3377ee;\
-		margin-top: 20px !important;\
+	}\
+	.stream-item.is-read ~ .stream-item.is-read-liked {\
+		border-left: 3px solid #9955ee;\
 	}\
 	.stream-item.is-read:hover {\
 		opacity: 1.0;\
@@ -528,7 +559,7 @@ function CSS_script() {
 		width:100%;\
 		height:100%;\
 	}\
-	.separated-module.has-recap {\
+	.separated-module.has-recap, .tweet.promoted-tweet {\
 		display: none;\
 	}\
 	li[data-component-context=suggest_who_to_follow] {\
