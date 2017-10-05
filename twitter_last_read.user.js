@@ -2,10 +2,10 @@
 // @name           Twitter last read
 // @namespace      http://armeagle.nl
 // @description    Keep track of your read tweets.
-// @include        http*://twitter.com*
+// @include        http*://twitter.com/*
 // @updateURL      https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
 // @downloadURL    https://raw.githubusercontent.com/ArmEagle/userscripts/master/twitter_last_read.user.js
-// @version        2.7
+// @version        2.8
 // @grant          none
 // ==/UserScript==
 
