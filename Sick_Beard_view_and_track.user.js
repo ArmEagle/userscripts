@@ -2,7 +2,8 @@
 // @name        Sick Beard view and track
 // @namespace   armeagle.nl
 // @include     http://*:8081/home/displayShow?show=*
-// @version     1.04
+// @require http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
+// @version     1.1
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -181,16 +182,20 @@ $('table.sickbeardTable2 tbody tr td:last-child a.epSearch').each(function() {
 	url = 'http://nzbindex.nl/search/?q=' + m_episode + '&age=&max=25&minage=&sort=agedesc&minsize=150&maxsize=&dq=&poster=&nfo=&complete=1&hidespam=0&hidespam=1&more=1';
 	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
 
-	// Add isohunt search
-	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search on Isohunt');
+	// Add torrent search
+	var img = $('<img/>').attr('src', $(this).find('img').attr('src')).attr('style', 'transform: rotate(90deg); margin-right: 5px;').attr('title', 'Search torrent');
 	
-	m_episode = episode + ' 1080p';
+	// add 1080p (isohunt)
+//	m_episode = episode + ' 1080p';
+	// replace whitespace with plus and remove some tokens
 	m_episode = m_episode.replace(/ /g, '+').replace(/[\(\)\[\]']/g,'');
 	
 	//url = 'http://isohunt.to/torrents/advancedSearch?yform_advanced_search=1&SearchForm[allWords]='
 	//+ m_episode
 	//+ '&SearchForm[category]=0&SearchForm[language]=0&SearchForm[seederCount]=1&submit=Search';
-	url = 'https://isohunt.to/torrents/?ihq=' + m_episode;
+//	url = 'https://isohunt.to/torrents/?ihq=' + m_episode;
+	// TPB sorted on size desc.
+	url = 'https://thepiratebay.org/search/' + m_episode +'/0/5/0';
 	
 	$(this).closest('td').prev().append($('<a/>').attr('href', url).append(img));
 	/*
