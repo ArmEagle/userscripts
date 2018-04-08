@@ -1,3 +1,5 @@
+jQuery = window.wrappedJSObject.jQuery;
+
 (function($){
   /**
    * Search and select an option of a select2 element. Supports ajax backed data.
