@@ -17,13 +17,13 @@ class MutationFindElementCallback {
 		this.selector = selector;
 		this.lock = lock;
 
+		// Look for elements right now.
+		this.findElements();
+		
 		const mutationOptions = {
 			childList: true,
 			subtree: true
 		};
-    
-		// Look for elements right now.
-		this.findElements();
 
 		// Create an observer instance linked to the callback function.
 		const mutationObserver = new MutationObserver(
